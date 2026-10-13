@@ -72,5 +72,5 @@ lib/
 
 ## 致谢
 
-- [vauy/auto_source_generator](https://github.com/vauy/auto_source_generator)
-- [vauy/xin-verify-book-source](https://github.com/vauy/xin-verify-book-source)
+- [xy9144/auto_source_generator](https://github.com/vauyxy9144/auto_source_generator)
+- [Qiantigers/xin-verify-book-source](https://github.com/Qiantigers/xin-verify-book-source)
