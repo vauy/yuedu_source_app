@@ -6,7 +6,7 @@
     <application
         android:label="阅读书源工具"
         android:name="${applicationName}"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true">
         <activity
             android:name=".MainActivity"

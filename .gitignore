@@ -9,6 +9,9 @@ build/
 .fvm/
 coverage/
 
+# 构建产物（保留 build_output 下的 APK 交付物，忽略 build/ 中间产物）
+build_output/*.sha1
+
 # Android
 **/android/**/gradle-wrapper.jar
 **/android/.gradle
