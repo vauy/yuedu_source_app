@@ -43,6 +43,12 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Bypass gradle wrapper, use system gradle
+        run: |
+          printf '#!/bin/sh\nexec gradle "$@"\n' > android/gradlew
+          chmod +x android/gradlew
+          gradle --version
+
       - name: Get dependencies
         run: flutter pub get
 
