@@ -1,19 +1,29 @@
-name: Build Flutter APK
+name: Build and Release APK
 
 on:
   push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
-  workflow_dispatch:          # 支持手动触发
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release 版本号（例如 v1.0.0）'
+        required: true
+        default: 'v1.0.0'
+        type: string
+
+permissions:
+  contents: write
 
 jobs:
-  build:
+  build-release:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -24,8 +34,9 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'   # 按 pubspec.yaml 中的 SDK 要求调整
+          flutter-version: '3.24.0'   # 按 pubspec.yaml 要求调整
           channel: 'stable'
+          cache: true
 
       - name: Get dependencies
         run: flutter pub get
@@ -33,8 +44,35 @@ jobs:
       - name: Build Release APK
         run: flutter build apk --release
 
-      - name: Upload APK artifact
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Rename APK
+        run: |
+          cp build/app/outputs/flutter-apk/app-release.apk \
+             yuedu_source_${{ steps.version.outputs.VERSION }}.apk
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-release
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: yuedu_source_${{ steps.version.outputs.VERSION }}
+          path: yuedu_source_${{ steps.version.outputs.VERSION }}.apk
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.VERSION }}
+          name: Release ${{ steps.version.outputs.VERSION }}
+          target_commitish: ${{ github.sha }}
+          files: yuedu_source_${{ steps.version.outputs.VERSION }}.apk
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
